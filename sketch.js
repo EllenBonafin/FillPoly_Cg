@@ -32,31 +32,17 @@ function draw() {
   background(220);
 
   for (const item of polygons) {
-
-
-
     for (let i = 0; i < item.vertices.length; i++) {
-      ellipse(item.vertices[i].x, item.vertices[i].y, 10, 10); 
+      let v1 = item.vertices[i];
+      let v2 = item.vertices[(i + 1) % item.vertices.length]; // Conecta o último vértice ao primeiro
+      line(v1.x, v1.y, v2.x, v2.y); // Traça a linha entre os dois vértices
     }
-  
-    // Desenhar o polígono se houver mais de 1 vértice
-    if (item.vertices.length > 1) {
-      beginShape();
-      for (let i = 0; i < item.vertices.length; i++) {
-        vertex(item.vertices[i].x, item.vertices[i].y); // Conectar os vértices
-
-      }
-  
-      endShape(CLOSE); // Fechar o polígono
-    }
+  }
 
   }
-  
- 
-}
 
 function mousePressed() {
-  if(mouseMode == "create" && mouseX >= 0 && mouseX <= 500 && mouseY >= 0 && mouseY <= 500) {
+  if(mouseMode == "create" && mouseX >= 0 && mouseX <= 500 && mouseY >= 0 && mouseY <= 500) { //intervalo que ajusta o mouse dentro do canva
   // Quando o usuário clicar, adicionar um novo vértice
     let novoVertice = createVector(mouseX, mouseY);
     polygons[polygons.length-1].vertices.push(novoVertice);
