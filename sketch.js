@@ -4,6 +4,7 @@ let polygons = [{
   vertices: [{x: 100, y: 100}, {x: 200, y:100}, {x: 150, y: 200}]
 }];
 let mouseMode = 'select'
+let openButton = document.querySelector('#openButton')
 
 function setup() {
   var cnv = createCanvas(500, 500);
@@ -14,12 +15,14 @@ function openA(){
 
   if (mouseMode == "create") {
     mouseMode = "select"
+    document.getElementById("openButton").innerHTML = "Open";
   } else {
     mouseMode = "create"
-    console.log({
-      id: polygons.length,
-      vertices: [],
-    })
+    document.getElementById("openButton").innerHTML = "Close";
+    // console.log({
+    //   id: polygons.length,
+    //   vertices: [],
+    // })
     polygons.push({
       id: polygons.length,
       vertices: [],
@@ -32,6 +35,10 @@ function draw() {
   background(220);
 
   for (const item of polygons) {
+    for (let i = 0; i < item.vertices.length; i++) {
+      ellipse(item.vertices[i].x, item.vertices[i].y, 10, 10); 
+    }
+
     for (let i = 0; i < item.vertices.length; i++) {
       let v1 = item.vertices[i];
       let v2 = item.vertices[(i + 1) % item.vertices.length]; // Conecta o último vértice ao primeiro
