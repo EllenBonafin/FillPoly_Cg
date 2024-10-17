@@ -14,7 +14,7 @@ function openA(){
   if (mouseMode == "create") {
     mouseMode = "select"
     document.getElementById("openButton").innerHTML = "Open";
-    const polygonsItens = polygons.map((polygon) => `<li>${polygon.id}: ${JSON.stringify(polygon.vertices.map(({x,y}) => ({x,y})))}</li>`);
+    const polygonsItens = polygons.map((polygon) => `<li>Poligno${polygon.id}: ${JSON.stringify(polygon.vertices.map(({x,y}) => ({x,y})))}</li>`);
 
     document.getElementById('polygons').innerHTML = polygonsItens.join(' ')
   } else {
@@ -41,6 +41,14 @@ function colorEdge() {
   }
 }
 
+function cleanList (){
+   polygons = [];
+   // Limpar o canvas
+   clear();
+   // Atualizar a lista de polígonos exibida na interface, se houver
+   document.getElementById('polygons').innerHTML = '';
+   
+}
 
 function draw() {
   background(220);

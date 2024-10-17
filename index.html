@@ -20,8 +20,17 @@
         <img src="Vector.svg" width="30" height="30" class="d-inline-block align-top" alt="">
         FillPoly
       </a>
-      <button type="button" class="btn btn-secondary mt-3 ms-2" id="openButton" onclick="openA()">Open</button>
-      <button type="button" class="btn btn-secondary mt-3 ms-2" id="colorEdge" onclick="colorEdge()">Color Edge</button>
+
+      <div class="btn-group" role="group" aria-label="Basic example">
+        
+        <button type="button" class="btn btn-secondary" id="openButton" onclick="openA()">Open</button>
+        <button type="button" class="btn btn btn-warning" id="colorEdge" onclick="colorEdge()">Color Edge</button>
+        <button type="button" class="btn btn-secondary" id="cleanScreen" onclick="cleanList()">Clean Screen</button>
+    <button type="button" class="btn btn-secondary" id="colorButton" onclick="color()">Color</button>
+    <button type="button" class="btn btn-secondary" id="fillPolyButton" onclick="fillPoly()">FillPoly</button>
+    <button type="button" class="btn btn-secondary" id="removeButton" onclick="remove()">Remove</button>
+      </div>
+
   </nav>     
  </div>
  <ul id="polygons">
