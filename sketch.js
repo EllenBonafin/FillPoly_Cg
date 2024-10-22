@@ -54,25 +54,31 @@ function cleanList() {
 }
 
 function draw() {
-  background(220);
+  background(220); // Limpa o fundo a cada frame
 
   for (const item of polygons) {
+    // Desenha os vértices do polígono
     for (let i = 0; i < item.vertices.length; i++) {
       ellipse(item.vertices[i].x, item.vertices[i].y, 10, 10);
     }
 
+    // Define a cor das linhas
     if (colorMode == "selectcolor") {
-      stroke(255, 255, 0); // Define a cor do traçado como amarelo
+      stroke(255, 255, 0); // Linhas amarelas no modo de seleção
     } else {
-      stroke(0); // Se não estiver no modo de colorir, as linhas ficam pretas
+      stroke(0); // Linhas pretas no modo normal
     }
+
     strokeWeight(2); // Define a espessura das linhas
 
+    // Desenha as linhas do polígono
     for (let i = 0; i < item.vertices.length; i++) {
       let v1 = item.vertices[i];
       let v2 = item.vertices[(i + 1) % item.vertices.length]; // Conecta o último vértice ao primeiro
-      line(v1.x, v1.y, v2.x, v2.y); // Traça a linha entre os dois vértices
+      line(v1.x, v1.y, v2.x, v2.y); // Traça a linha entre dois vértices
     }
+
+    // Chama a função para preencher o polígono
     fillPolygon(item);
   }
 }
@@ -122,52 +128,52 @@ function pointInPolygon(point, polygon) {
   return inside;
 }
 
-function fillPolygon(polygon) {
-  if (polygon.vertices.length < 2) {
-    return;
-  }
+function recalculateIntersections(polygon) {
+  polygon.intersections = [];
 
-  let intersections = [];
-
-  // Calcula as interseções
+  // Loop pelos vértices do polígono para calcular as interseções
   for (let vertice = 0; vertice < polygon.vertices.length; vertice++) {
     let { x: x1, y: y1 } = polygon.vertices[vertice];
     let { x: x2, y: y2 } =
       polygon.vertices[(vertice + 1) % polygon.vertices.length];
 
-    if (y1 != y2) {
+    if (y1 !== y2) {
+      // Ignora arestas horizontais
       if (y1 > y2) {
-        [x1, y1, x2, y2] = [x2, y2, x1, y1]; // Inverte se y1 for maior que y2
+        // Se y1 for maior que y2, inverte os pontos
+        [x1, y1, x2, y2] = [x2, y2, x1, y1];
       }
 
-      let tx = (x2 - x1) / (y2 - y1);
+      let tx = (x2 - x1) / (y2 - y1); // Taxa de variação de x em função de y
 
-      while (y1 < y2) {
-        if (!intersections[y1] || intersections[y1].length === 0) {
-          intersections[y1] = [];
+      // Calcula as interseções para cada linha y entre y1 e y2
+      while (y1 <= y2) {
+        if (!polygon.intersections[y1]) {
+          polygon.intersections[y1] = [];
         }
-        intersections[y1].push(x1);
-        y1 += 1;
-        x1 += tx;
+
+        polygon.intersections[y1].push(x1);
+        x1 += tx; // Atualiza x de acordo com a taxa
+        y1++; // Incrementa o valor de y
       }
     }
   }
+}
 
-  polygon.intersections = intersections;
+function fillPolygon(polygon) {
+  // Preenche o polígono usando as interseções calculadas
+  for (let y in polygon.intersections) {
+    let xs = polygon.intersections[y];
+    xs.sort((a, b) => a - b); // Ordena os x's
 
-  // Preenche o polígono usando as interseções
-  for (let y = 0; y < intersections.length; y++) {
-    let xs = intersections[y];
-    if (xs && xs.length >= 2) {
-      xs.sort((a, b) => a - b); // Ordena os x's
-      for (let i = 0; i < xs.length; i += 2) {
-        let xStart = xs[i];
-        let xEnd = xs[i + 1];
+    for (let i = 0; i < xs.length; i += 2) {
+      let xStart = xs[i];
+      let xEnd = xs[i + 1];
 
-        for (let x = xStart; x <= xEnd; x++) {
-          point(x, y); // Desenha os pontos
-          stroke(...(polygon.selected ? [0, 0, 240] : polygon.color));
-        }
+      // Desenha a linha horizontal entre xStart e xEnd
+      for (let x = xStart; x <= xEnd; x++) {
+        point(x, y); // Desenha o ponto (pixel) entre as interseções
+        stroke(...(polygon.selected ? [0, 0, 240] : polygon.color));
       }
     }
   }
@@ -186,6 +192,7 @@ function mousePressed() {
     // Quando o usuário clicar, adicionar um novo vértice
     let novoVertice = createVector(mouseX, mouseY);
     polygons[polygons.length - 1].vertices.push(novoVertice);
+    recalculateIntersections(polygons[polygons.length - 1]);
   }
 
   // Verificação do ponto no polígono
