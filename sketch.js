@@ -142,7 +142,8 @@ function fillPolygon(polygon) {
       // Verifique se a scanline cruza a aresta
       if ((v1.y <= y && v2.y > y) || (v2.y <= y && v1.y > y)) {
         // Calcule o ponto de interseção da scanline com a aresta
-        let xIntersection = ((v2.x - v1.x) * (y - v1.y)) / (v2.y - v1.y) + v1.x;
+        let TX = (v2.x - v1.x) / (v2.y - v1.y);
+        let xIntersection = v1.x + TX * (y - v1.y);
         intersections.push(xIntersection);
       }
     }
