@@ -126,40 +126,48 @@ function fillPolygon(polygon) {
   if (polygon.vertices.length < 2) {
     return;
   }
-  // Obtenha o valor y mínimo e máximo dos vértices do polígono
-  let minY = Math.min(...polygon.vertices.map((v) => v.y));
-  let maxY = Math.max(...polygon.vertices.map((v) => v.y));
 
-  // Para cada linha de varredura (scanline)
-  for (let y = minY; y <= maxY; y++) {
-    let intersections = [];
+  let intersections = [];
 
-    // Encontre todas as interseções da scanline com as arestas do polígono
-    for (let i = 0; i < polygon.vertices.length; i++) {
-      let v1 = polygon.vertices[i];
-      let v2 = polygon.vertices[(i + 1) % polygon.vertices.length];
+  // Calcula as interseções
+  for (let vertice = 0; vertice < polygon.vertices.length; vertice++) {
+    let { x: x1, y: y1 } = polygon.vertices[vertice];
+    let { x: x2, y: y2 } =
+      polygon.vertices[(vertice + 1) % polygon.vertices.length];
 
-      // Verifique se a scanline cruza a aresta
-      if ((v1.y <= y && v2.y > y) || (v2.y <= y && v1.y > y)) {
-        // Calcule o ponto de interseção da scanline com a aresta
-        let TX = (v2.x - v1.x) / (v2.y - v1.y);
-        let xIntersection = v1.x + TX * (y - v1.y);
-        intersections.push(xIntersection);
+    if (y1 != y2) {
+      if (y1 > y2) {
+        [x1, y1, x2, y2] = [x2, y2, x1, y1]; // Inverte se y1 for maior que y2
+      }
+
+      let tx = (x2 - x1) / (y2 - y1);
+
+      while (y1 < y2) {
+        if (!intersections[y1] || intersections[y1].length === 0) {
+          intersections[y1] = [];
+        }
+        intersections[y1].push(x1);
+        y1 += 1;
+        x1 += tx;
       }
     }
+  }
 
-    // Ordene as interseções por coordenada X
-    intersections.sort((a, b) => a - b);
+  polygon.intersections = intersections;
 
-    // Preencha entre pares de interseções
-    for (let i = 0; i < intersections.length; i += 2) {
-      let xStart = intersections[i];
-      let xEnd = intersections[i + 1];
+  // Preenche o polígono usando as interseções
+  for (let y = 0; y < intersections.length; y++) {
+    let xs = intersections[y];
+    if (xs && xs.length >= 2) {
+      xs.sort((a, b) => a - b); // Ordena os x's
+      for (let i = 0; i < xs.length; i += 2) {
+        let xStart = xs[i];
+        let xEnd = xs[i + 1];
 
-      // Desenhe a linha horizontal entre xStart e xEnd
-      for (let x = xStart; x <= xEnd; x++) {
-        point(x, y); // Aqui você desenha os pontos (pixels) entre as interseções
-        stroke(...(polygon.selected ? [0, 0, 240] : polygon.color));
+        for (let x = xStart; x <= xEnd; x++) {
+          point(x, y); // Desenha os pontos
+          stroke(...(polygon.selected ? [0, 0, 240] : polygon.color));
+        }
       }
     }
   }
