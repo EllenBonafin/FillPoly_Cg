@@ -95,8 +95,11 @@ function pointInPolygon(point, polygon) {
     if ((v1.y <= y && v2.y > y) || (v2.y <= y && v1.y > y)) {
       console.log(`O ponto está entre as coordenadas Y dos vértices.`);
 
-      const xIntersection = ((v2.x - v1.x) * (y - v1.y)) / (v2.y - v1.y) + v1.x;
-      console.log(`Interseção calculada: ${xIntersection}`);
+      // Calcula a taxa incremental de X (TX)
+      const TX = (v2.x - v1.x) / (v2.y - v1.y);
+      let xIntersection = v1.x + TX * (y - v1.y);
+
+      console.log(`Interseção incremental calculada: ${xIntersection}`);
 
       // Se a interseção está à direita do ponto, conta como cruzamento
       if (x < xIntersection) {
@@ -182,7 +185,7 @@ function mousePressed() {
 
     polygons.forEach((item) => (item.selected = false));
 
-    const invertedList = polygons
+    const invertedList = polygons;
     // inverte o array de poligonos
     for (const polygon of invertedList.reverse()) {
       if (pointInPolygon(ponto, polygon.vertices)) {
