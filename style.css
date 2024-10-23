@@ -15,3 +15,8 @@ canvas {
   display: flex;
 
 }
+
+.color-input {
+  padding-top: 10px; /* ajuste o valor conforme necessário */
+}
+

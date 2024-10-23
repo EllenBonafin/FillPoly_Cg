@@ -45,6 +45,31 @@ function colorEdge() {
   }
 }
 
+function removepoli() {
+  if (selectedPolygon) {
+    // Encontre o índice do polígono selecionado no array de polígonos
+    const index = polygons.indexOf(selectedPolygon);
+    // Se o polígono foi encontrado no array (index não é -1), remova-o
+    if (index > -1) {
+      polygons.splice(index, 1); // Remove o polígono da lista
+    }
+    // Limpe a seleção após remover
+    selectedPolygon = null;
+
+    updatePolygonList();
+  }
+}
+
+function updatePolygonList() {
+  const polygonsItens = polygons.map(
+    (polygon) =>
+      `<li>Polígono ${polygon.id} - Cor: ${JSON.stringify(polygon.color)} - Vértices: ${JSON.stringify(polygon.vertices.map(({ x, y }) => ({ x, y })))} </li>`
+  );
+
+  document.getElementById("polygons").innerHTML = polygonsItens.join(" ");
+}
+
+
 function cleanList() {
   polygons = [];
   // Limpar o canvas
@@ -79,7 +104,6 @@ function draw() {
 function colorSelected() {
   const colorPicker = document.getElementById("colorPicker");
   
-  // Verifique se há um polígono selecionado
   if (selectedPolygon) {
     // Atualiza a cor do polígono selecionado com a cor escolhida
     selectedPolygon.color = hexToRgb(colorPicker.value);
