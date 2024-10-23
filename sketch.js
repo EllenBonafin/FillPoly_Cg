@@ -1,4 +1,4 @@
-let vertices = []; // Declaração do array para armazenar os vértices
+let vertices = [];
 let polygons = [];
 let mouseMode = "select";
 let openButton = document.querySelector("#openButton");
@@ -6,8 +6,9 @@ let colorMode = "unselect";
 let colorButton = document.querySelector("#openButton");
 
 function setup() {
-  var cnv = createCanvas(500, 500);
+  var cnv = createCanvas(500, 400);
   cnv.style("display", "block");
+  cnv.parent("sketch-holder");
 }
 
 function openA() {
@@ -30,32 +31,29 @@ function openA() {
       id: polygons.length,
       vertices: [],
       color: [0, 0, 0],
-      selected: false,
     });
   }
 }
 
 function colorEdge() {
   if (colorMode == "selectcolor") {
-    colorMode = "unselect"; // Desativa o modo de colorir
-    document.getElementById("colorButton").innerHTML = "Color Edge"; // Altera o texto do botão
+    colorMode = "unselect";
+    document.getElementById("colorEdge").innerHTML = "Color Edge";
   } else {
-    colorMode = "selectcolor"; // Ativa o modo de colorir
-    document.getElementById("colorButton").innerHTML = "Uncolor Edge"; // Altera o texto do botão
+    colorMode = "selectcolor";
+    document.getElementById("colorEdge").innerHTML = "Uncolor Edge";
   }
 }
 
 function removepoli() {
   if (selectedPolygon) {
-    // Encontre o índice do polígono selecionado no array de polígonos
+    // Encontra o índice do polígono selecionado no array de polígonos
     const index = polygons.indexOf(selectedPolygon);
-    // Se o polígono foi encontrado no array (index não é -1), remova-o
+    // garante que index não é -1
     if (index > -1) {
-      polygons.splice(index, 1); // Remove o polígono da lista
+      polygons.splice(index, 1);
     }
-    // Limpe a seleção após remover
     selectedPolygon = null;
-
     updatePolygonList();
   }
 }
@@ -63,33 +61,30 @@ function removepoli() {
 function updatePolygonList() {
   const polygonsItens = polygons.map(
     (polygon) =>
-      `<li>Polígono ${polygon.id} - Cor: ${JSON.stringify(polygon.color)} - Vértices: ${JSON.stringify(polygon.vertices.map(({ x, y }) => ({ x, y })))} </li>`
+      `<li>Polígono ${polygon.id} - Cor: ${JSON.stringify(polygon.color)} - Vértices: ${JSON.stringify(polygon.vertices.map(({ x, y }) => ({ x, y })))} </li>`,
   );
 
   document.getElementById("polygons").innerHTML = polygonsItens.join(" ");
 }
 
-
 function cleanList() {
   polygons = [];
-  // Limpar o canvas
+
   clear();
-  // Atualizar a lista de polígonos exibida na interface, se houver
+
   document.getElementById("polygons").innerHTML = "";
 }
 
 function draw() {
-  background(220); // Limpa o fundo a cada frame
+  background(220);
 
   for (const item of polygons) {
-    // // Chama a função para preencher o polígono
     fillPolygon(item);
 
-    // Define a cor das linhas
     if (colorMode == "selectcolor") {
       stroke(255, 255, 0); // Linhas amarelas no modo de seleção
     }
-    strokeWeight(2); // Define a espessura das linhas
+    strokeWeight(2);
 
     // Desenha as linhas do polígono
     for (let i = 0; i < item.vertices.length; i++) {
@@ -103,17 +98,20 @@ function draw() {
 
 function colorSelected() {
   const colorPicker = document.getElementById("colorPicker");
-  
+
   if (selectedPolygon) {
     // Atualiza a cor do polígono selecionado com a cor escolhida
     selectedPolygon.color = hexToRgb(colorPicker.value);
-    console.log(`Cor do polígono ${selectedPolygon.id} alterada para: ${colorPicker.value}`);
+
+    selectedPolygon = false;
+    console.log(
+      `Cor do polígono ${selectedPolygon.id} alterada para: ${colorPicker.value}`,
+    );
   } else {
     console.log("Nenhum polígono selecionado.");
   }
 }
 
-// Função para converter cor hexadecimal em RGB
 function hexToRgb(hex) {
   let r = parseInt(hex.slice(1, 3), 16);
   let g = parseInt(hex.slice(3, 5), 16);
@@ -121,38 +119,31 @@ function hexToRgb(hex) {
   return [r, g, b];
 }
 
-
 function pointInPolygon(point, polygon) {
   const { x, y } = point;
   let crossings = 0;
 
-  if (
-    mouseX >= 0 &&
-    mouseX <= 500 &&
-    mouseY >= 0 &&
-    mouseY <= 500
-  ){
-    
+  if (mouseX >= 0 && mouseX <= 500 && mouseY >= 0 && mouseY <= 400) {
     console.log(`Verificando o ponto (${x}, ${y}) contra o polígono:`);
-  
+
     for (let i = 0; i < polygon.length; i++) {
       const v1 = polygon[i];
       const v2 = polygon[(i + 1) % polygon.length];
-  
+
       console.log(
         `Verificando aresta entre (${v1.x}, ${v1.y}) e (${v2.x}, ${v2.y})`,
       );
-  
+
       // Verifica se o ponto está entre as coordenadas y dos dois vértices
       if ((v1.y <= y && v2.y > y) || (v2.y <= y && v1.y > y)) {
         console.log(`O ponto está entre as coordenadas Y dos vértices.`);
-  
+
         // Calcula a taxa incremental de X (TX)
         const TX = (v2.x - v1.x) / (v2.y - v1.y);
         let xIntersection = v1.x + TX * (y - v1.y);
-  
+
         console.log(`Interseção incremental calculada: ${xIntersection}`);
-  
+
         // Se a interseção está à direita do ponto, conta como cruzamento
         if (x < xIntersection) {
           console.log(
@@ -166,11 +157,11 @@ function pointInPolygon(point, polygon) {
         console.log(`O ponto não está entre as coordenadas Y dos vértices.`);
       }
     }
-  
+
     console.log(`Total de cruzamentos: ${crossings}`);
     const inside = crossings % 2 === 1;
     console.log(`O ponto está dentro do polígono? ${inside}`);
-  
+
     return inside;
   }
 }
@@ -185,7 +176,6 @@ function recalculateIntersections(polygon) {
       polygon.vertices[(vertice + 1) % polygon.vertices.length];
 
     if (y1 !== y2) {
-      // Ignora arestas horizontais
       if (y1 > y2) {
         // Se y1 for maior que y2, inverte os pontos
         [x1, y1, x2, y2] = [x2, y2, x1, y1];
@@ -208,19 +198,22 @@ function recalculateIntersections(polygon) {
 }
 
 function fillPolygon(polygon) {
-  // Preenche o polígono usando as interseções calculadas
+  // Preenche o polígono usando as interseções calculadas anteriormente
   for (let y in polygon.intersections) {
     let xs = polygon.intersections[y];
-    xs.sort((a, b) => a - b); // Ordena os x's
+    xs.sort((a, b) => a - b);
 
     for (let i = 0; i < xs.length; i += 2) {
       let xStart = xs[i];
       let xEnd = xs[i + 1];
 
-      // Desenha a linha horizontal entre xStart e xEnd
       for (let x = xStart; x <= xEnd; x++) {
-        point(x, y); // Desenha o ponto (pixel) entre as interseções
-        stroke(...(polygon.selected ? [0, 0, 240] : polygon.color));
+        point(x, y); // Desenha o ponto (pixel)
+        stroke(
+          ...(selectedPolygon && selectedPolygon.id == polygon.id
+            ? [0, 0, 240]
+            : polygon.color),
+        );
       }
     }
   }
@@ -234,7 +227,7 @@ function mousePressed() {
     mouseX >= 0 &&
     mouseX <= 500 &&
     mouseY >= 0 &&
-    mouseY <= 500
+    mouseY <= 400
   ) {
     // Quando o usuário clicar, adicionar um novo vértice
     let novoVertice = createVector(mouseX, mouseY);
@@ -243,30 +236,27 @@ function mousePressed() {
   }
 
   // Verificação do ponto no polígono
-  if (mouseMode == "select" && polygons.length > 0) {
+  if (
+    mouseMode == "select" &&
+    polygons.length > 0 &&
+    mouseX >= 0 &&
+    mouseX <= 500 &&
+    mouseY >= 0 &&
+    mouseY <= 400
+  ) {
+    selectedPolygon = null;
     let ponto = { x: mouseX, y: mouseY }; // Ponto onde clicou
-
-    polygons.forEach((item) => (item.selected = false));
 
     const invertedList = polygons;
     // inverte o array de poligonos
     for (const polygon of invertedList.reverse()) {
       if (pointInPolygon(ponto, polygon.vertices)) {
         console.log("Ponto dentro do polígono!");
-        polygon.selected = true;
         selectedPolygon = polygon; // Armazena o polígono selecionado
         return;
       } else {
         console.log("Ponto fora do polígono!", polygon.id);
       }
     }
-  }
-}
-
-
-function keyPressed() {
-  // Pressionar a tecla 'C' limpa o polígono e reinicia os vértices
-  if (key === "C" || key === "c") {
-    vertices = [];
   }
 }
