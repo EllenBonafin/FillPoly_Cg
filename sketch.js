@@ -57,75 +57,98 @@ function draw() {
   background(220); // Limpa o fundo a cada frame
 
   for (const item of polygons) {
-    // Desenha os vértices do polígono
-    for (let i = 0; i < item.vertices.length; i++) {
-      ellipse(item.vertices[i].x, item.vertices[i].y, 10, 10);
-    }
+    // // Chama a função para preencher o polígono
+    fillPolygon(item);
 
     // Define a cor das linhas
     if (colorMode == "selectcolor") {
       stroke(255, 255, 0); // Linhas amarelas no modo de seleção
-    } else {
-      stroke(0); // Linhas pretas no modo normal
     }
-
     strokeWeight(2); // Define a espessura das linhas
 
     // Desenha as linhas do polígono
     for (let i = 0; i < item.vertices.length; i++) {
       let v1 = item.vertices[i];
       let v2 = item.vertices[(i + 1) % item.vertices.length]; // Conecta o último vértice ao primeiro
+
       line(v1.x, v1.y, v2.x, v2.y); // Traça a linha entre dois vértices
     }
-
-    // Chama a função para preencher o polígono
-    fillPolygon(item);
   }
 }
+
+function colorSelected() {
+  const colorPicker = document.getElementById("colorPicker");
+  
+  // Verifique se há um polígono selecionado
+  if (selectedPolygon) {
+    // Atualiza a cor do polígono selecionado com a cor escolhida
+    selectedPolygon.color = hexToRgb(colorPicker.value);
+    console.log(`Cor do polígono ${selectedPolygon.id} alterada para: ${colorPicker.value}`);
+  } else {
+    console.log("Nenhum polígono selecionado.");
+  }
+}
+
+// Função para converter cor hexadecimal em RGB
+function hexToRgb(hex) {
+  let r = parseInt(hex.slice(1, 3), 16);
+  let g = parseInt(hex.slice(3, 5), 16);
+  let b = parseInt(hex.slice(5, 7), 16);
+  return [r, g, b];
+}
+
 
 function pointInPolygon(point, polygon) {
   const { x, y } = point;
   let crossings = 0;
 
-  console.log(`Verificando o ponto (${x}, ${y}) contra o polígono:`);
-
-  for (let i = 0; i < polygon.length; i++) {
-    const v1 = polygon[i];
-    const v2 = polygon[(i + 1) % polygon.length];
-
-    console.log(
-      `Verificando aresta entre (${v1.x}, ${v1.y}) e (${v2.x}, ${v2.y})`,
-    );
-
-    // Verifica se o ponto está entre as coordenadas y dos dois vértices
-    if ((v1.y <= y && v2.y > y) || (v2.y <= y && v1.y > y)) {
-      console.log(`O ponto está entre as coordenadas Y dos vértices.`);
-
-      // Calcula a taxa incremental de X (TX)
-      const TX = (v2.x - v1.x) / (v2.y - v1.y);
-      let xIntersection = v1.x + TX * (y - v1.y);
-
-      console.log(`Interseção incremental calculada: ${xIntersection}`);
-
-      // Se a interseção está à direita do ponto, conta como cruzamento
-      if (x < xIntersection) {
-        console.log(
-          `A interseção está à direita do ponto. Contando como cruzamento.`,
-        );
-        crossings++;
+  if (
+    mouseX >= 0 &&
+    mouseX <= 500 &&
+    mouseY >= 0 &&
+    mouseY <= 500
+  ){
+    
+    console.log(`Verificando o ponto (${x}, ${y}) contra o polígono:`);
+  
+    for (let i = 0; i < polygon.length; i++) {
+      const v1 = polygon[i];
+      const v2 = polygon[(i + 1) % polygon.length];
+  
+      console.log(
+        `Verificando aresta entre (${v1.x}, ${v1.y}) e (${v2.x}, ${v2.y})`,
+      );
+  
+      // Verifica se o ponto está entre as coordenadas y dos dois vértices
+      if ((v1.y <= y && v2.y > y) || (v2.y <= y && v1.y > y)) {
+        console.log(`O ponto está entre as coordenadas Y dos vértices.`);
+  
+        // Calcula a taxa incremental de X (TX)
+        const TX = (v2.x - v1.x) / (v2.y - v1.y);
+        let xIntersection = v1.x + TX * (y - v1.y);
+  
+        console.log(`Interseção incremental calculada: ${xIntersection}`);
+  
+        // Se a interseção está à direita do ponto, conta como cruzamento
+        if (x < xIntersection) {
+          console.log(
+            `A interseção está à direita do ponto. Contando como cruzamento.`,
+          );
+          crossings++;
+        } else {
+          console.log(`A interseção está à esquerda do ponto. Ignorando.`);
+        }
       } else {
-        console.log(`A interseção está à esquerda do ponto. Ignorando.`);
+        console.log(`O ponto não está entre as coordenadas Y dos vértices.`);
       }
-    } else {
-      console.log(`O ponto não está entre as coordenadas Y dos vértices.`);
     }
+  
+    console.log(`Total de cruzamentos: ${crossings}`);
+    const inside = crossings % 2 === 1;
+    console.log(`O ponto está dentro do polígono? ${inside}`);
+  
+    return inside;
   }
-
-  console.log(`Total de cruzamentos: ${crossings}`);
-  const inside = crossings % 2 === 1;
-  console.log(`O ponto está dentro do polígono? ${inside}`);
-
-  return inside;
 }
 
 function recalculateIntersections(polygon) {
@@ -207,6 +230,7 @@ function mousePressed() {
       if (pointInPolygon(ponto, polygon.vertices)) {
         console.log("Ponto dentro do polígono!");
         polygon.selected = true;
+        selectedPolygon = polygon; // Armazena o polígono selecionado
         return;
       } else {
         console.log("Ponto fora do polígono!", polygon.id);
@@ -214,6 +238,7 @@ function mousePressed() {
     }
   }
 }
+
 
 function keyPressed() {
   // Pressionar a tecla 'C' limpa o polígono e reinicia os vértices
