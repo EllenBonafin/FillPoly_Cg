@@ -1,0 +1,23 @@
+html, body {
+  height: 100%;
+}
+
+canvas {
+  display: block;
+
+}
+
+.color-input {
+  padding-top: 10px; /* ajuste o valor conforme necessário */
+}
+
+.canvasposition{
+  display: flex;
+
+  /* This centers our sketch horizontally. */
+  justify-content: center;
+
+  /* This centers our sketch vertically. */
+  align-items: center;
+}
+
