@@ -11,16 +11,10 @@ function setup() {
   cnv.parent("sketch-holder");
 }
 
-function openA() {
+function openCanva() {
   if (mouseMode == "create") {
     mouseMode = "select";
     document.getElementById("openButton").innerHTML = "Open";
-    const polygonsItens = polygons.map(
-      (polygon) =>
-        `<li>Poligono ${polygon.id} - ${JSON.stringify(polygon.color)} : ${JSON.stringify(polygon.vertices.map(({ x, y }) => ({ x, y })))}</li>`,
-    );
-
-    document.getElementById("polygons").innerHTML = polygonsItens.join(" ");
   } else {
     mouseMode = "create";
     document.getElementById("openButton").innerHTML = "Close";
@@ -45,7 +39,7 @@ function colorEdge() {
   }
 }
 
-function removepoli() {
+function removepoly() {
   if (selectedPolygon) {
     // Encontra o índice do polígono selecionado no array de polígonos
     const index = polygons.indexOf(selectedPolygon);
@@ -61,7 +55,7 @@ function removepoli() {
 function updatePolygonList() {
   const polygonsItens = polygons.map(
     (polygon) =>
-      `<li>Polígono ${polygon.id} - Cor: ${JSON.stringify(polygon.color)} - Vértices: ${JSON.stringify(polygon.vertices.map(({ x, y }) => ({ x, y })))} </li>`,
+      `<li style="font-weight: ${selectedPolygon && selectedPolygon.id == polygon.id ? "bold" : "regular"};">Polígono ${polygon.id} - Cor: ${JSON.stringify(polygon.color)} - Vértices: ${JSON.stringify(polygon.vertices.map(({ x, y }) => ({ x, y })))} </li>`,
   );
 
   document.getElementById("polygons").innerHTML = polygonsItens.join(" ");
@@ -84,14 +78,14 @@ function draw() {
     if (colorMode == "selectcolor") {
       stroke(255, 255, 0); // Linhas amarelas no modo de seleção
     }
+
     strokeWeight(2);
 
-    // Desenha as linhas do polígono
     for (let i = 0; i < item.vertices.length; i++) {
       let v1 = item.vertices[i];
       let v2 = item.vertices[(i + 1) % item.vertices.length]; // Conecta o último vértice ao primeiro
 
-      line(v1.x, v1.y, v2.x, v2.y); // Traça a linha entre dois vértices
+      line(v1.x, v1.y, v2.x, v2.y); 
     }
   }
 }
@@ -103,7 +97,6 @@ function colorSelected() {
     // Atualiza a cor do polígono selecionado com a cor escolhida
     selectedPolygon.color = hexToRgb(colorPicker.value);
 
-    selectedPolygon = false;
     console.log(
       `Cor do polígono ${selectedPolygon.id} alterada para: ${colorPicker.value}`,
     );
@@ -209,17 +202,13 @@ function fillPolygon(polygon) {
 
       for (let x = xStart; x <= xEnd; x++) {
         point(x, y); // Desenha o ponto (pixel)
-        stroke(
-          ...(selectedPolygon && selectedPolygon.id == polygon.id
-            ? [0, 0, 240]
-            : polygon.color),
-        );
+        stroke(...polygon.color);
       }
     }
   }
 }
 
-let selectedPolygon = null; // Adiciona uma variável para armazenar o polígono selecionado
+let selectedPolygon = null; 
 
 function mousePressed() {
   if (
@@ -229,7 +218,7 @@ function mousePressed() {
     mouseY >= 0 &&
     mouseY <= 400
   ) {
-    // Quando o usuário clicar, adicionar um novo vértice
+  
     let novoVertice = createVector(mouseX, mouseY);
     polygons[polygons.length - 1].vertices.push(novoVertice);
     recalculateIntersections(polygons[polygons.length - 1]);
@@ -247,16 +236,16 @@ function mousePressed() {
     selectedPolygon = null;
     let ponto = { x: mouseX, y: mouseY }; // Ponto onde clicou
 
-    const invertedList = polygons;
     // inverte o array de poligonos
-    for (const polygon of invertedList.reverse()) {
-      if (pointInPolygon(ponto, polygon.vertices)) {
+    for (let i = polygons.length - 1; i > -1; i--) {
+      if (pointInPolygon(ponto, polygons[i].vertices)) {
         console.log("Ponto dentro do polígono!");
-        selectedPolygon = polygon; // Armazena o polígono selecionado
-        return;
+        selectedPolygon = polygons[i]; 
+        break;
       } else {
-        console.log("Ponto fora do polígono!", polygon.id);
+        console.log("Ponto fora do polígono!", polygons[i].id);
       }
     }
   }
+  updatePolygonList();
 }
